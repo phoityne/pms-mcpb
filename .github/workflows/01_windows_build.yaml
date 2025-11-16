@@ -1,0 +1,87 @@
+name: 01_windows_build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 0.1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout trigger repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          
+      - name: Clone dependent repositories
+        shell: bash
+        run: |
+          mkdir -p pms
+          repos=("pty-mcp-server" \
+                 "pms-ui-request" "pms-ui-response" "pms-ui-notification" \
+                 "pms-infra-cmdrun" "pms-infra-procspawn" "pms-infra-socket" "pms-infra-watch" "pms-infra-serial" \
+                 "pms-application-service" "pms-domain-service" "pms-domain-model")
+          for repo in "${repos[@]}"; do
+            echo "Cloning $repo..."
+            git clone https://github.com/phoityne/$repo.git pms/$repo
+          done
+
+      - name: Create cabal.project file
+        working-directory: pms/pty-mcp-server
+        run: |
+          echo "packages: ../*" > cabal.project
+
+      - name: Set up GHC and Cabal
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.6.3'
+          cabal-version: '3.10.1.0'
+
+      - name: Update package index
+        run: cabal update
+
+      - name: Configure pty-mcp-server (with fallback if static fails)
+        working-directory: pms/pty-mcp-server
+        run: |
+          cabal configure --enable-executable-static || cabal configure
+
+      - name: Build pty-mcp-server
+        working-directory: pms/pty-mcp-server
+        run: cabal build exe:pty-mcp-server
+
+      - name: Copy binary to bin/
+        shell: bash
+        run: |
+          mkdir -p bin
+          BIN_PATH=$(find pms/pty-mcp-server/dist-newstyle/build -type f -name pty-mcp-server.exe | head -n1)
+          if [ -z "$BIN_PATH" ]; then
+            echo "Binary not found"
+            exit 1
+          fi
+          cp "$BIN_PATH" pty-mcp-server-windows-no-mingw.exe
+
+      - name: Compress binary using xz
+        run: |
+          xz -9 -T0 -k -f pty-mcp-server-windows-no-mingw.exe
+
+      # ここまでで生成されるファイル:
+      # bin/pty-mcp-server-windows-no-mingw.exe.xz
+
+      - name: Create GitHub Release and upload Windows binary
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: "Release ${{ github.event.inputs.version }}"
+          files: |
+            pty-mcp-server-windows-no-mingw.exe.xz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

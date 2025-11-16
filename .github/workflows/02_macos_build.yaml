@@ -1,0 +1,82 @@
+name: 02_macOS Manual Build (Apple Silicon)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout trigger repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Clone dependent repositories
+        shell: bash
+        run: |
+          mkdir -p pms
+          repos=("pty-mcp-server" \
+                 "pms-ui-request" "pms-ui-response" "pms-ui-notification" \
+                 "pms-infrastructure" "pms-infra-cmdrun" "pms-infra-procspawn" "pms-infra-socket" "pms-infra-watch" "pms-infra-serial" \
+                 "pms-application-service" "pms-domain-service" "pms-domain-model")
+          for repo in "${repos[@]}"; do
+            echo "Cloning $repo..."
+            git clone https://github.com/phoityne/$repo.git pms/$repo
+          done
+
+      - name: Create cabal.project file
+        working-directory: pms/pty-mcp-server
+        run: |
+          echo "packages: ../*" > cabal.project
+
+      - name: Set up GHC and Cabal
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.6.7'
+          cabal-version: '3.10.1.0'
+
+      - name: Update package index
+        run: cabal update
+
+      - name: Configure pty-mcp-server
+        working-directory: pms/pty-mcp-server
+        run: cabal configure
+
+      - name: Build pty-mcp-server with optimizations
+        working-directory: pms/pty-mcp-server
+        run: cabal build exe:pty-mcp-server --ghc-options="-O2 -split-sections"
+
+      - name: Copy and strip binary
+        shell: bash
+        run: |
+          mkdir -p bin
+          BIN_PATH=$(find pms/pty-mcp-server/dist-newstyle/build -type f -name pty-mcp-server | head -n1)
+          if [ -z "$BIN_PATH" ]; then
+            echo "Binary not found"
+            exit 1
+          fi
+          cp "$BIN_PATH" bin/pty-mcp-server-macos-aarch64
+          du -sk bin/pty-mcp-server-macos-aarch64
+          strip bin/pty-mcp-server-macos-aarch64
+          du -sk bin/pty-mcp-server-macos-aarch64
+
+      - name: Compress binary using xz
+        run: |
+          xz -9 -T0 -k -f bin/pty-mcp-server-macos-aarch64
+
+      - name: Commit and push compressed binary
+        shell: bash
+        run: |
+          ls -la bin
+          git lfs install
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull origin main
+          git add bin/pty-mcp-server-macos-aarch64.xz
+          git commit -m "Add compressed binary for macOS aarch64 (.xz)" || echo "No changes to commit"
+          git push origin main
