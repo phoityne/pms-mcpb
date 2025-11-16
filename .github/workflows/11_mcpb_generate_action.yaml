@@ -23,37 +23,43 @@ jobs:
       - name: Install mcpb CLI
         run: npm install -g @anthropic-ai/mcpb
 
-      - name: Download Windows binary (.xz) from release
+      - name: Download Windows & macOS binaries from release
         shell: bash
         run: |
           set -e
 
           VERSION="${{ github.event.inputs.version }}"
-          TARGET_FILE="pty-mcp-server-windows-no-mingw-${VERSION}.exe.xz"
+          FILES=(
+            "pty-mcp-server-windows-no-mingw-${VERSION}.exe.xz"
+            "pty-mcp-server-macos-aarch64-${VERSION}.xz"
+          )
 
-          echo "Downloading asset: $TARGET_FILE"
+          echo "Target version: $VERSION"
+          echo "Files: ${FILES[@]}"
 
           API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/$VERSION"
           JSON=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
 
-          ASSET_URL=$(echo "$JSON" \
-            | jq -r ".assets[] | select(.name==\"$TARGET_FILE\") | .url")
+          for FILE in "${FILES[@]}"; do
+            echo "Searching for asset: $FILE"
 
-          if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then
-            echo "Asset not found in release"
-            exit 1
-          fi
+            ASSET_URL=$(echo "$JSON" \
+              | jq -r ".assets[] | select(.name==\"$FILE\") | .url")
 
-          echo "Downloading from: $ASSET_URL"
+            if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then
+              echo "Asset not found: $FILE"
+              exit 1
+            fi
 
-          curl -L \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/octet-stream" \
-            "$ASSET_URL" \
-            -o "$TARGET_FILE"
+            echo "Downloading $FILE ..."
+            curl -L \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/octet-stream" \
+              "$ASSET_URL" \
+              -o "$FILE"
 
-          echo "Downloaded: $TARGET_FILE"
-
+            echo "Downloaded: $FILE"
+          done
 
       - name: Run create_mcpb.sh
         run: |
