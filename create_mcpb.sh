@@ -2,8 +2,6 @@
 
 version=$1
 
-ls -la bin
-
 echo "Decompressing .xz binaries in ./"
 for file in *.xz; do
   [ -e "$file" ] || continue
@@ -11,8 +9,10 @@ for file in *.xz; do
   xz -d -k "$file"
 done
 
-mv bin/pty-mcp-server-macos-aarch64-${version} bin/pty-mcp-server
-mv bin/pty-mcp-server-windows-no-mingw-${version}.exe bin/pty-mcp-server.exe
+mkdir -p bin
+
+mv pty-mcp-server-macos-aarch64-${version} bin/pty-mcp-server
+mv pty-mcp-server-windows-no-mingw-${version}.exe bin/pty-mcp-server.exe
 
 mcpb pack . pty-mcp-server-${version}.mcpb
 
