@@ -29,6 +29,9 @@ jobs:
           set -e
 
           VERSION="${{ github.event.inputs.version }}"
+
+          mkdir -p bin
+
           FILES=(
             "pty-mcp-server-windows-no-mingw-${VERSION}.exe.xz"
             "pty-mcp-server-macos-aarch64-${VERSION}.xz"
@@ -56,9 +59,9 @@ jobs:
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Accept: application/octet-stream" \
               "$ASSET_URL" \
-              -o "$FILE"
+              -o "bin/$FILE"
 
-            echo "Downloaded: $FILE"
+            echo "Downloaded: bin/$FILE"
           done
 
       - name: Run create_mcpb.sh
