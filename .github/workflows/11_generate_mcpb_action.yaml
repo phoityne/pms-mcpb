@@ -23,6 +23,38 @@ jobs:
       - name: Install mcpb CLI
         run: npm install -g @anthropic-ai/mcpb
 
+      - name: Download Windows binary (.xz) from release
+        shell: bash
+        run: |
+          set -e
+
+          VERSION="${{ github.event.inputs.version }}"
+          TARGET_FILE="pty-mcp-server-windows-no-mingw-${VERSION}.exe.xz"
+
+          echo "Downloading asset: $TARGET_FILE"
+
+          API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/$VERSION"
+          JSON=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
+
+          ASSET_URL=$(echo "$JSON" \
+            | jq -r ".assets[] | select(.name==\"$TARGET_FILE\") | .url")
+
+          if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then
+            echo "Asset not found in release"
+            exit 1
+          fi
+
+          echo "Downloading from: $ASSET_URL"
+
+          curl -L \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/octet-stream" \
+            "$ASSET_URL" \
+            -o "$TARGET_FILE"
+
+          echo "Downloaded: $TARGET_FILE"
+
+
       - name: Run create_mcpb.sh
         run: |
           chmod +x ./create_mcpb.sh

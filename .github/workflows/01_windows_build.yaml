@@ -59,20 +59,16 @@ jobs:
       - name: Copy binary to bin/
         shell: bash
         run: |
-          mkdir -p bin
           BIN_PATH=$(find pms/pty-mcp-server/dist-newstyle/build -type f -name pty-mcp-server.exe | head -n1)
           if [ -z "$BIN_PATH" ]; then
             echo "Binary not found"
             exit 1
           fi
-          cp "$BIN_PATH" pty-mcp-server-windows-no-mingw.exe
+          cp "$BIN_PATH" pty-mcp-server-windows-no-mingw-${{ github.event.inputs.version }}.exe
 
       - name: Compress binary using xz
         run: |
-          xz -9 -T0 -k -f pty-mcp-server-windows-no-mingw.exe
-
-      # ここまでで生成されるファイル:
-      # bin/pty-mcp-server-windows-no-mingw.exe.xz
+          xz -9 -T0 -k -f pty-mcp-server-windows-no-mingw-${{ github.event.inputs.version }}.exe
 
       - name: Create GitHub Release and upload Windows binary
         uses: softprops/action-gh-release@v2
@@ -80,7 +76,7 @@ jobs:
           tag_name: ${{ github.event.inputs.version }}
           name: "Release ${{ github.event.inputs.version }}"
           files: |
-            pty-mcp-server-windows-no-mingw.exe.xz
+            pty-mcp-server-windows-no-mingw-${{ github.event.inputs.version }}.exe.xz
           draft: false
           prerelease: false
         env:
