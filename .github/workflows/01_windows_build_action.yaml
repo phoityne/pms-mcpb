@@ -1,4 +1,4 @@
-name: 01_windows_build
+name: 01_windows_build_action
 
 on:
   workflow_dispatch:

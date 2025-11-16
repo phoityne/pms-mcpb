@@ -1,4 +1,4 @@
-name: 11_generate_mcbp_action
+name: 11_mcpb_generate_action
 
 on:
   workflow_dispatch:
