@@ -1,6 +1,6 @@
 # pms-mcpb
 
-`pms-mcpb` is a utility project for creating `.mcpb` packages. It is used to build and distribute `.mcpb` packages for the [`pty-mcp-server`](https://github.com/phoityne/pty-mcp-server). The generated packages can be downloaded from the [`download`](https://github.com/phoityne/pms-mcpb/tree/main/download) folder.
+`pms-mcpb` is a utility project for creating `.mcpb` packages. It is used to build and distribute `.mcpb` packages for the [`pty-mcp-server`](https://github.com/phoityne/pty-mcp-server). The generated packages can be downloaded from the [Release Tags](https://github.com/phoityne/pms-mcpb/tags).
 
 The `.mcpb` format is a standardized archive format that bundles an MCP server and its related tools in a structure that AI applications can correctly recognize and utilize. It serves as an official packaging and deployment method — and is the **official deployment format for Claude Code**.
 For details on the `.mcpb` archive structure and available reference tooling, see: [**mcpb on GitHub**](https://github.com/anthropics/mcpb)
@@ -188,6 +188,14 @@ The server communicates exclusively via **standard input/output (stdio)**, ensur
 - **`serial-message`**  
   This tool sends a specified string to the active socket connection, then waits for a recognizable prompt from the remote side. Upon detecting the prompt, it captures and returns all output received prior to it.
 
+- **`pms-list-dir`**  
+  List the contents of a directory at the specified path.
+
+- **`pms-read-file`**  
+  Read the contents of a file at the specified path.
+
+- **`pms-write-file`**  
+  Write contents to a file at the specified path.
 
 - **`Scriptable CLI Integration`**  
   The `pty-mcp-server` supports execution of shell scripts associated with registered tools defined in `tools-list.json`. Each tool must be registered by name, and a corresponding shell script (`.sh`) should exist in the configured `tools/` directory.
@@ -270,14 +278,14 @@ You can install `pty-mcp-server` using `cabal`:
 $ cabal install pty-mcp-server
 ```
 
-### Installation via `.mcpb` Package
+### Installation via `.dxt` Package
 
-You can also set up the tool using a pre-packaged `.mcpb` file.  
+You can also set up the tool using a pre-packaged `.dxt` file.  
 This method is suitable for quick installation into Claude Code or for manual setup via extraction.
 
-> 🛠️ The `.mcpb` package distribution is currently **in preparation**,  
+> 🛠️ The `.dxt` package distribution is currently **in preparation**,  
 > but you can check the latest status and download links at:  
-> [https://github.com/phoityne/pms-mcpb](https://github.com/phoityne/pms-mcpb)
+> [https://github.com/phoityne/pms-dxt](https://github.com/phoityne/pms-dxt)
 
 
 ### Binary Execution
