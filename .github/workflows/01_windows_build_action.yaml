@@ -26,7 +26,7 @@ jobs:
           mkdir -p pms
           repos=("pty-mcp-server" \
                  "pms-ui-request" "pms-ui-response" "pms-ui-notification" \
-                 "pms-infra-cmdrun" "pms-infra-procspawn" "pms-infra-socket" "pms-infra-watch" "pms-infra-serial" \
+                 "pms-infra-cmdrun" "pms-infra-procspawn" "pms-infra-socket" "pms-infra-watch" "pms-infra-serial" "pms-infra-filesystem" \
                  "pms-application-service" "pms-domain-service" "pms-domain-model")
           for repo in "${repos[@]}"; do
             echo "Cloning $repo..."
