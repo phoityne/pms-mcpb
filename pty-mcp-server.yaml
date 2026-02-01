@@ -3,6 +3,7 @@ logLevel : "Debug"
 toolsDir : "pty-mcp-server/tools"
 promptsDir : "pty-mcp-server/prompts"
 resourcesDir : "pty-mcp-server/resources"
+sandboxDir : "pty-mcp-server/sandbox"
 prompts:
   - '>>>'
   - '...'
@@ -21,26 +22,24 @@ invalidChars:
 invalidCmds:
   - del
   - erase
-  - rd
   - rmdir
-  - format
-  - shutdown
-  - restart
-  - taskkill
   - rm
-  - dd
-  - chmod
-  - chown
-  - shutdown
-  - reboot
+  - format
   - kill
+  - taskkill
+  - su
+  - sudo
+  - restart
+  - reboot
+  - shutdown
 
-
+  
 # not yet implemented parameters.
 environment:
   ProgramData: "C:\\ProgramData"
   SystemRoot: "C:\\Windows"
 timeoutMicrosec: 1000000
+sandboxNW : "192.168.0.0/24"
 serial:
   device: "COM3"
   commSpeed: 9600
@@ -49,3 +48,4 @@ serial:
   parity: "NoParity"
   flowControl: "NoFlowControl"
   timeout: 1
+
