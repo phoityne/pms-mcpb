@@ -27,7 +27,8 @@ jobs:
           repos=("pty-mcp-server" \
                  "pms-ui-request" "pms-ui-response" "pms-ui-notification" \
                  "pms-infra-agent-process" "pms-infra-cmdrun" "pms-infra-procspawn" "pms-infra-socket" "pms-infra-watch" "pms-infra-serial" "pms-infra-filesystem" \
-                 "pms-application-service" "pms-domain-service" "pms-domain-model")
+                 "pms-application-service" "pms-domain-service" "pms-domain-model" \
+                 "ai-agent-diff-patch")
           for repo in "${repos[@]}"; do
             echo "Cloning $repo..."
             git clone https://github.com/phoityne/$repo.git pms/$repo
