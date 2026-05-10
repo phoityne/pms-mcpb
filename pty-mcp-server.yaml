@@ -33,8 +33,14 @@ invalidCmds:
   - reboot
   - shutdown
 agentAllowedCmds:
+  - cmd
   - cmd.exe
+  - powershell
+  - powershell.exe
   - bash
+  - /bin/bash
+
+
   
 # not yet implemented parameters.
 environment:
